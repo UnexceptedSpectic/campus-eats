@@ -383,9 +383,7 @@ UNLOCK TABLES;
 
 --
 -- Dumping events for database 'niner_eats'
---
-
---
+--	
 -- Dumping routines for database 'niner_eats'
 --
 /*!50003 DROP PROCEDURE IF EXISTS `add_person` */;
