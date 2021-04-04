@@ -361,10 +361,13 @@ DROP TABLE IF EXISTS `restaurant_rating`;
 CREATE TABLE `restaurant_rating` (
   `restaurant_rating_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `rating_id` int(11) NOT NULL,
+  `restaurant_id` int(11) NOT NULL,
   `taste_rating` TINYINT NOT NULL,
   `freshness_rating` TINYINT NOT NULL,
   KEY `fk_rating_id` (`rating_id`),
-  CONSTRAINT `restaurant_fk_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`)
+  KEY `fk_id` (`restaurant_id`),
+  CONSTRAINT `restaurant_fk_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`),
+  CONSTRAINT `restaurant_fk_id` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`restaurant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
