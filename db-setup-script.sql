@@ -1,4 +1,4 @@
-Drop database Campus_Eats_Fall2020;
+Drop database if exists Campus_Eats_Fall2020;
 Create database Campus_Eats_Fall2020;
 Use Campus_Eats_Fall2020;
 -- MySQL dump 10.13  Distrib 8.0.18, for Win64 (x86_64)
