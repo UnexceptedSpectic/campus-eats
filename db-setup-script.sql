@@ -332,6 +332,11 @@ INSERT INTO `rating` (`order_id`, `comment`) VALUES (1, 'pellentesque,'), (2, 't
 UNLOCK TABLES;
 
 -- 
+-- Create index on the rating comment column
+-- 
+CREATE INDEX rating_comment_idx ON `rating` (`comment`);
+
+-- 
 -- Table structure for table `driver_rating`
 -- 
 
@@ -383,7 +388,9 @@ UNLOCK TABLES;
 
 --
 -- Dumping events for database 'niner_eats'
---	
+--
+
+--
 -- Dumping routines for database 'niner_eats'
 --
 /*!50003 DROP PROCEDURE IF EXISTS `add_person` */;
@@ -522,3 +529,8 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 -- /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+-- 
+-- Create index on the order description column
+-- 
+CREATE INDEX order_description_idx ON `order` (`order_description`);
