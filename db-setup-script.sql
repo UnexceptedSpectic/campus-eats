@@ -320,7 +320,7 @@ CREATE TABLE `rating` (
   `order_id` int(11) NOT NULL,
   `comment` varchar(300) DEFAULT NULL,
   KEY `fk_order_id` (`order_id`),
-  CONSTRAINT `fk_order_id` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`)
+  CONSTRAINT `fk_order_id` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- 
@@ -348,7 +348,7 @@ CREATE TABLE `driver_rating` (
   `promptness_rating` TINYINT NOT NULL,
   `politeness_rating` TINYINT NOT NULL,
   KEY `driver_fk_rating_id` (`rating_id`),
-  CONSTRAINT `driver_fk_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`),
+  CONSTRAINT `driver_fk_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`) ON DELETE CASCADE,
   KEY `driver_restaurant_fk_id` (`restaurant_id`),
   CONSTRAINT `driver_restaurant_fk_id` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`restaurant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -373,7 +373,7 @@ CREATE TABLE `restaurant_rating` (
   `taste_rating` TINYINT NOT NULL,
   `freshness_rating` TINYINT NOT NULL,
   KEY `restaurant_fk_rating_id` (`rating_id`),
-  CONSTRAINT `restaurant_fk_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`),
+  CONSTRAINT `restaurant_fk_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`) ON DELETE CASCADE,
   KEY `restaurant_fk_id` (`restaurant_id`),
   CONSTRAINT `restaurant_fk_id` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`restaurant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -499,7 +499,7 @@ CREATE TABLE `order` (
   CONSTRAINT `fk_O_location_id` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`),
   CONSTRAINT `fk_O_person_id` FOREIGN KEY (`person_id`) REFERENCES `person` (`person_id`),
   CONSTRAINT `fk_O_restaurant_id` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`restaurant_id`),
-  CONSTRAINT `fk_O_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`)
+  CONSTRAINT `fk_O_rating_id` FOREIGN KEY (`rating_id`) REFERENCES `rating` (`rating_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -520,15 +520,130 @@ UNLOCK TABLES;
 -- /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `order_AFTER_INSERT` AFTER INSERT ON `order` FOR EACH ROW BEGIN
-	insert into niner_eats.delivery (driver_id, vehicle_id) values(new.driver_id, 2);
-END */;;
-DELIMITER ;
+-- DELIMITER ;;
+-- /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `order_AFTER_INSERT` AFTER INSERT ON `order` FOR EACH ROW BEGIN
+-- 	insert into niner_eats.delivery (driver_id, vehicle_id) values(new.driver_id, 2);
+-- END */;;
+-- DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 -- /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+-- 
+-- Create a table to track operations on the order table
+-- 
+
+DROP TABLE IF EXISTS `order_audit`;
+CREATE TABLE `order_audit`
+(
+  `order_id` 			int(11) 		NOT NULL,
+  `person_id` 			int(11) 		NOT NULL,
+  `delivery_id`			int(11) 		NOT NULL,
+  `location_id` 		int(11) 		NOT NULL,
+  `driver_id` 			int(11) 		NOT NULL,
+  `restaurant_id` 		int(11) 		NOT NULL,
+  `rating_id` 			int(11),
+  `order_description` 	VARCHAR(75) 	NOT NULL,
+  `total_price` 		float 			NOT NULL,
+  `delivery_charge` 	float,
+  `sql_operation`		VARCHAR(10)		NOT NULL,
+  `sql_operation_date`	DATE			NOT NULL
+);
+
+-- 
+-- Create triggers to log operations on the order table
+-- 
+
+DROP TRIGGER IF EXISTS order_before_insert;
+DROP TRIGGER IF EXISTS order_before_update;
+DROP TRIGGER IF EXISTS order_before_delete;
+
+DELIMITER //
+
+CREATE TRIGGER order_before_insert
+  BEFORE INSERT ON `order`
+  FOR EACH ROW
+BEGIN
+    INSERT INTO `order_audit` VALUES
+    (
+    NEW.`order_id`, 
+    NEW.`person_id`, 
+    NEW.`delivery_id`, 
+    NEW.`location_id`, 
+    NEW.`driver_id`,
+    NEW.`restaurant_id`,
+    NEW.`rating_id`,
+    NEW.`order_description`,
+    NEW.`total_price`,
+    NEW.`delivery_charge`,
+    'INSERT', 
+    NOW()
+    );
+END//
+
+CREATE TRIGGER order_before_update
+  BEFORE UPDATE ON `order`
+  FOR EACH ROW
+BEGIN
+    INSERT INTO `order_audit` VALUES
+    (
+    NEW.`order_id`, 
+    NEW.`person_id`, 
+    NEW.`delivery_id`, 
+    NEW.`location_id`, 
+    NEW.`driver_id`,
+    NEW.`restaurant_id`,
+    NEW.`rating_id`,
+    NEW.`order_description`,
+    NEW.`total_price`,
+    NEW.`delivery_charge`,
+    'UPDATE', 
+    NOW()
+    );
+END//
+
+CREATE TRIGGER order_before_delete
+  BEFORE DELETE ON `order`
+  FOR EACH ROW
+BEGIN
+    INSERT INTO `order_audit` VALUES
+    (
+    OLD.`order_id`, 
+    OLD.`person_id`, 
+    OLD.`delivery_id`, 
+    OLD.`location_id`, 
+    OLD.`driver_id`,
+    OLD.`restaurant_id`,
+    OLD.`rating_id`,
+    OLD.`order_description`,
+    OLD.`total_price`,
+    OLD.`delivery_charge`,
+    'DELETION', 
+    NOW()
+    );
+END//
+
+DELIMITER ;
+
+--
+-- Test above triggers
+--
+
+/*
+INSERT INTO `order` 
+		(`order_id`, `person_id`, `delivery_id`, `location_id`, `driver_id`, `restaurant_id`, `order_description`, `total_price`)
+VALUES (102,		1, 				2, 			3, 				4, 				5, 			'French Fries', 		2.50);
+
+UPDATE `order`
+SET `order_description` = CONCAT(`order`.`order_description`, ' and French Fries')
+WHERE `order_id` = 2;
+
+DELETE FROM `order`
+WHERE `order_id` = 1;
+
+SELECT * FROM `order_audit`;
+*/
 
 -- 
 -- Create index on the order description column
