@@ -537,18 +537,18 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `order_audit`;
 CREATE TABLE `order_audit`
 (
-  `order_id` 			int(11) 		NOT NULL,
-  `person_id` 			int(11) 		NOT NULL,
-  `delivery_id`			int(11) 		NOT NULL,
-  `location_id` 		int(11) 		NOT NULL,
-  `driver_id` 			int(11) 		NOT NULL,
-  `restaurant_id` 		int(11) 		NOT NULL,
-  `rating_id` 			int(11),
-  `order_description` 	VARCHAR(75) 	NOT NULL,
-  `total_price` 		float 			NOT NULL,
-  `delivery_charge` 	float,
-  `sql_operation`		VARCHAR(10)		NOT NULL,
-  `sql_operation_date`	DATE			NOT NULL
+  `order_id` 	int(11) NOT NULL,
+  `person_id` 	int(11) NOT NULL,
+  `delivery_id`	int(11) NOT NULL,
+  `location_id` int(11) NOT NULL,
+  `driver_id` 	int(11) NOT NULL,
+  `restaurant_id` int(11) NOT NULL,
+  `rating_id` 	int(11),
+  `order_description` VARCHAR(75) NOT NULL,
+  `total_price`  float 	NOT NULL,
+  `delivery_charge` float,
+  `sql_operation` VARCHAR(10) NOT NULL,
+  `sql_operation_date` DATE NOT NULL
 );
 
 -- 
@@ -633,7 +633,7 @@ DELIMITER ;
 /*
 INSERT INTO `order` 
 		(`order_id`, `person_id`, `delivery_id`, `location_id`, `driver_id`, `restaurant_id`, `order_description`, `total_price`)
-VALUES (102,		1, 				2, 			3, 				4, 				5, 			'French Fries', 		2.50);
+VALUES (102, 1, 2, 3, 4, 5, 'French Fries', 2.50);
 
 UPDATE `order`
 SET `order_description` = CONCAT(`order`.`order_description`, ' and French Fries')
@@ -646,6 +646,21 @@ SELECT * FROM `order_audit`;
 */
 
 -- 
+
+USE Campus_Eats_Fall2020;
+CREATE TRIGGER model_name
+BEFORE INSERT ON vehicle
+FOR EACH ROW 
+SET NEW.model = LOWER(NEW.model);
+
+-- Test above trigger
+
+/* 
+INSERT INTO vehicle VALUES (21, '9999', 'Z', 'BMW'); 
+SELECT * FROM Campus_Eats_Fall2020.vehicle;
+
+*/
+
 -- Create index on the order description column
 -- 
 CREATE INDEX order_description_idx ON `order` (`order_description`);
