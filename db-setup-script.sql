@@ -707,3 +707,42 @@ Join `location`
 On `order`.`location_id` = `location`.`location_id`
 Group by `driver_rating`.`promptness_rating`
 Order by `driver_rating`.`promptness_rating`;
+
+-- Create user and admin roles and set their privileges
+CREATE ROLE IF NOT EXISTS ce_user, ce_admin;
+
+GRANT SELECT 
+ON Campus_Eats_Fall2020.* 
+TO ce_user;
+
+GRANT ALL 
+ON Campus_Eats_Fall2020.* 
+TO ce_admin;
+
+--  Create two sample user accounts
+DROP USER IF EXISTS haps_user@localhost;
+CREATE USER haps_user@localhost 
+IDENTIFIED BY 'pa55word';
+
+DROP USER IF EXISTS jay_admin@localhost;
+CREATE USER jay_admin@localhost 
+IDENTIFIED BY 'pa55word';
+
+-- Assign roles to the user accounts created above. Default roles are set at login.
+GRANT ce_user 
+TO haps_user@localhost;
+
+SET DEFAULT ROLE ce_user 
+TO haps_user@localhost;
+
+GRANT ce_admin 
+TO jay_admin@localhost;
+
+SET DEFAULT ROLE ce_admin 
+TO jay_admin@localhost;
+
+-- TODO: create a view to the restaurant table that is named view_haps and only shows restaurant id 1
+
+-- TODO: grant haps_user both select and update privileges to the view
+
+-- TODO: write queries for "include a screenshot that shows that haps cannot delete a restaurant record (even for haps) but can update via the view."
