@@ -741,8 +741,15 @@ TO jay_admin@localhost;
 SET DEFAULT ROLE ce_admin 
 TO jay_admin@localhost;
 
--- TODO: create a view to the restaurant table that is named view_haps and only shows restaurant id 1
+-- Create a view to the restaurant table that is named view_haps and only shows restaurant id 1
+DROP VIEW IF EXISTS view_haps;
+CREATE VIEW view_haps AS 
+(SELECT * from restaurant 
+where restaurant_id = 1);
 
--- TODO: grant haps_user both select and update privileges to the view
+-- Grant haps_user both select and update privileges to the view
+GRANT SELECT, UPDATE 
+ON campus_eats_fall2020.view_haps 
+TO 'haps_user'@'localhost';
 
 -- TODO: write queries for "include a screenshot that shows that haps cannot delete a restaurant record (even for haps) but can update via the view."
