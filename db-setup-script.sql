@@ -752,4 +752,18 @@ GRANT SELECT, UPDATE
 ON campus_eats_fall2020.view_haps 
 TO 'haps_user'@'localhost';
 
--- TODO: write queries for "include a screenshot that shows that haps cannot delete a restaurant record (even for haps) but can update via the view."
+-- Test permissions. Login to DBMS as `haps_user` required.
+
+/*
+-- `haps_user` can read records from `view_haps`
+SELECT * 
+FROM view_haps;
+
+-- `haps_user` can update `view_haps` data
+UPDATE view_haps
+SET website = 'https://www.google.com';
+
+-- `haps_user` cannot delete `view_haps` data
+DELETE FROM view_haps
+WHERE restaurant_id = 1;
+*/
